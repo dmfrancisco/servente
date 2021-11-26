@@ -1,0 +1,12 @@
+{
+  "name": "servente",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npx serve --single"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "trailingComma": "none"
+  },
+  "license": "MIT"
+}

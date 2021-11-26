@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>Servente: Preview a local static site in your browser</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta name="description" content="Preview a local static site in your browser" />
+    <meta property="og:title" content="Servente" />
+    <meta property="og:url" content="https://servente.pages.dev" />
+    <meta property="og:image" content="https://servente.pages.dev/social.jpg" />
+  </head>
+
+  <body>
+    <button id="directory">Open folder…</button>
+
+    <div class="description">
+      Preview a local static site in your browser. Click "Open folder…" and select a directory with
+      an <code>index.html</code> file.
+      <a href="https://github.com/dmfrancisco/servente">Learn more</a>.
+    </div>
+
+    <div id="support"></div>
+
+    <script>
+      const directoryEl = document.getElementById("directory");
+      const supportEl = document.getElementById("support");
+
+      navigator.serviceWorker
+        .register("service-worker.js", { type: "module" })
+        .then((registration) => console.info("[servente] SW registered:", registration))
+        .catch((err) => console.error("[servente] Error registering SW:", err));
+
+      navigator.serviceWorker.ready.then((registration) => {
+        const handleDirectoryClick = async () => {
+          console.info("[servente] Requesting access to directory…");
+          const directoryHandle = await window.showDirectoryPicker();
+
+          console.info("[servente] Sending directory handle to service worker…");
+          registration.active.postMessage({ directoryHandle });
+        };
+
+        const handleMessage = (event) => {
+          const { completed } = event.data;
+
+          console.info("[servente] Redirecting to loaded site…");
+          if (completed) window.location.href = "/";
+        };
+
+        directoryEl.addEventListener("click", handleDirectoryClick, false);
+
+        navigator.serviceWorker.addEventListener("message", handleMessage);
+      });
+
+      if (!"showOpenFilePicker" in window) {
+        supportEl.innerText = "Your browser does not support File System Access API.";
+      } else if (!"serviceWorker" in navigator) {
+        supportEl.innerText = "Your browser does not support Service Workers.";
+      }
+    </script>
+  </body>
+</html>
