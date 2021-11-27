@@ -44,7 +44,8 @@ self.addEventListener("message", async (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  console.info("[servente-sw] Received fetch request.");
+  if (event.request.method !== "GET") return;
+  console.info("[servente-sw] Received GET fetch request.");
 
   const url = new URL(event.request.url);
   if (url.host !== self.location.host) return;
