@@ -2,36 +2,127 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-
-    <title>Servente: Preview a local static site in your browser</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <title>Servente: Preview a local static site in your browser</title>
     <meta name="description" content="Preview a local static site in your browser" />
-    <meta property="og:title" content="Servente" />
-    <meta property="og:url" content="https://servente.pages.dev" />
-    <meta property="og:image" content="https://servente.pages.dev/social.jpg" />
+
+    <style>
+      :root {
+        --color-bg: #f6f6f6;
+        --color-fg: #6b7280;
+        --color-primary: #1a73ff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg: #272727;
+          --color-fg: #fff;
+          --color-primary: #8ab4ff;
+        }
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji";
+        background: var(--color-bg);
+        color: var(--color-fg);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 1rem;
+      }
+      main {
+        text-align: center;
+      }
+      .description {
+        max-width: 410px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .support {
+        font-weight: bold;
+      }
+      p {
+        margin-top: 1.5rem;
+      }
+      button {
+        -webkit-appearance: button;
+        cursor: pointer;
+        border: none;
+        background: var(--color-primary);
+        color: var(--color-bg);
+        font: inherit;
+        font-weight: bold;
+        line-height: 1;
+        padding: 0.75rem;
+        border-radius: 6px;
+        user-select: none;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      button:active {
+        opacity: 0.95;
+      }
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono,
+          monospace;
+        padding: 0.15em 0.35em;
+        margin: 0;
+        font-size: 85%;
+        background: rgb(175 184 193 / 20%);
+        border-radius: 6px;
+      }
+    </style>
   </head>
 
   <body>
-    <button id="directory">Open folder…</button>
-
-    <div class="description">
-      Preview a local static site in your browser. Click "Open folder…" and select a directory with
-      an <code>index.html</code> file.
-      <a href="https://github.com/dmfrancisco/servente">Learn more</a>.
-    </div>
-
-    <div id="support"></div>
+    <main>
+      <button id="directory">Open folder</button>
+      <p class="description">
+        Preview a local static site. Click the button and select a directory with an
+        <code>index.html</code> file. To get back to this page, visit <code>/servente</code> or a
+        path that results in a 404.
+        <a href="https://github.com/dmfrancisco/servente">Learn more.</a>
+      </p>
+      <p id="support" class="support"></p>
+    </main>
 
     <script>
       const directoryEl = document.getElementById("directory");
       const supportEl = document.getElementById("support");
 
+      if (!window.showDirectoryPicker) {
+        supportEl.innerText = "Your browser does not support the File System Access API.";
+      } else if (!"serviceWorker" in navigator) {
+        supportEl.innerText = "Your browser does not support Service Workers.";
+      }
+
       navigator.serviceWorker
         .register("service-worker.js", { type: "module" })
         .then((registration) => console.info("[servente] SW registered:", registration))
-        .catch((err) => console.error("[servente] Error registering SW:", err));
+        .catch((err) => {
+          supportEl.innerText = "Error registering service worker.";
+        });
 
       navigator.serviceWorker.ready.then((registration) => {
         const handleDirectoryClick = async () => {
@@ -53,12 +144,6 @@
 
         navigator.serviceWorker.addEventListener("message", handleMessage);
       });
-
-      if (!"showOpenFilePicker" in window) {
-        supportEl.innerText = "Your browser does not support File System Access API.";
-      } else if (!"serviceWorker" in navigator) {
-        supportEl.innerText = "Your browser does not support Service Workers.";
-      }
     </script>
   </body>
 </html>
